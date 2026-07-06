@@ -561,11 +561,13 @@
   l.querySelectorAll('a').forEach(a => a.addEventListener('click', () => l.classList.remove('open')));
 
   // Wind gust on downward scroll: the field-video speeds up briefly and the
-  // hero content is nudged down, both easing back smoothly (time-based).
+  // headline + card get blown upward, drifting like things caught by the
+  // wind, then settle back smoothly (time-based).
   (function wind() {
     const vid = document.querySelector('.hero-bg video');
     const hero = document.querySelector('.hero');
-    const inner = document.querySelector('.hero-inner');
+    const h1 = hero.querySelector('h1');
+    const card = hero.querySelector('.hero-card');
     if (!vid) return;
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) { vid.remove(); return; } // poster/img stays
     vid.addEventListener('error', function () { vid.remove(); }); // fall back to still image
@@ -598,7 +600,14 @@
       gustTarget *= Math.exp(-1.8 * dt);                       // squall dies down
       gust += (gustTarget - gust) * (1 - Math.exp(-5 * dt));   // smooth swell/settle
       if (vid.parentNode) vid.playbackRate = BASE_RATE + gust * 0.35; // wind picks up gently
-      if (inner) inner.style.transform = gust > 0.02 ? 'translateY(' + (gust * 22).toFixed(1) + 'px)' : '';
+      if (gust > 0.02) {
+        // blown upward: the headline is heavier, the card catches more wind
+        if (h1) h1.style.transform = 'translateY(' + (-gust * 26).toFixed(1) + 'px) rotate(' + (-gust * 0.6).toFixed(2) + 'deg)';
+        if (card) card.style.transform = 'translate(' + (gust * 12).toFixed(1) + 'px,' + (-gust * 44).toFixed(1) + 'px) rotate(' + (gust * 1.1).toFixed(2) + 'deg)';
+      } else {
+        if (h1) h1.style.transform = '';
+        if (card) card.style.transform = '';
+      }
     })(prev);
   })();
 </script>
