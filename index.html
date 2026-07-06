@@ -132,18 +132,6 @@
   .hero-card p { margin: 0 0 1.1rem; font-size: 1.05rem; line-height: 1.35; }
   .hero-card .card-actions { display: flex; gap: .6rem; flex-wrap: wrap; }
 
-  /* wind-blown grass silhouette */
-  .hero-grass { position: absolute; left: 0; right: 0; bottom: -1px; width: 100%; height: clamp(120px, 20vh, 240px); z-index: 1; pointer-events: none; display: block; }
-  .hero-grass .blade { transform-box: fill-box; transform-origin: 50% 100%; animation: sway var(--dur, 3s) ease-in-out var(--delay, 0s) infinite; will-change: transform; }
-  @keyframes sway {
-    0%   { transform: rotate(calc(var(--a, 4) * -1deg)); }
-    50%  { transform: rotate(calc(var(--a, 4) * 1deg)); }
-    100% { transform: rotate(calc(var(--a, 4) * -1deg)); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .hero-grass .blade { animation: none; }
-  }
-
   /* ---------- SECTION HEADERS ---------- */
   section { position: relative; }
   .sec-pad { padding-top: clamp(3.5rem, 6vw, 6rem); padding-bottom: clamp(3.5rem, 6vw, 6rem); }
@@ -287,7 +275,6 @@
   <div class="hero-bg">
     <img src="https://picsum.photos/seed/campingforest/1600/1000" alt="Camping in der Natur" />
   </div>
-  <svg class="hero-grass" viewBox="0 0 1440 240" preserveAspectRatio="none" aria-hidden="true"><g id="grass"></g></svg>
   <div class="hero-inner">
     <h1>Ihr Partner<br />fürs Camping</h1>
     <div class="hero-card">
@@ -559,40 +546,6 @@
   const l = document.getElementById('navLinks');
   t.addEventListener('click', () => l.classList.toggle('open'));
   l.querySelectorAll('a').forEach(a => a.addEventListener('click', () => l.classList.remove('open')));
-
-  // Generate wind-blown grass blades
-  (function grass() {
-    const g = document.getElementById('grass');
-    if (!g) return;
-    const W = 1440, H = 240;
-    const colors = ['#12130f', '#1c1c17', '#22211b'];
-    const N = 150;
-    const svgNS = 'http://www.w3.org/2000/svg';
-    for (let i = 0; i < N; i++) {
-      const x = Math.random() * (W + 20) - 10;       // base x
-      const h = 70 + Math.random() * 150;            // blade height
-      const w = 5 + Math.random() * 9;               // base width
-      const dir = Math.random() < 0.5 ? -1 : 1;      // bend direction
-      const bend = (14 + Math.random() * 30) * dir;  // horizontal bend of tip
-      const tipX = x + w / 2 + bend;
-      const tipY = H - h;
-      // leaf-shaped blade: base-left -> tip -> base-right
-      const cLx = x + bend * 0.35, cLy = H - h * 0.45;
-      const cRx = x + w + bend * 0.35, cRy = H - h * 0.45;
-      const d = `M${x.toFixed(1)},${H} Q${cLx.toFixed(1)},${cLy.toFixed(1)} ${tipX.toFixed(1)},${tipY.toFixed(1)} Q${cRx.toFixed(1)},${cRy.toFixed(1)} ${(x + w).toFixed(1)},${H} Z`;
-      const path = document.createElementNS(svgNS, 'path');
-      path.setAttribute('d', d);
-      path.setAttribute('fill', colors[Math.floor(Math.random() * colors.length)]);
-      path.setAttribute('class', 'blade');
-      const amp = 3 + Math.random() * 6;             // sway degrees
-      const dur = 2.6 + Math.random() * 2.6;         // seconds
-      const delay = -Math.random() * dur;            // desync
-      path.style.setProperty('--a', amp.toFixed(2));
-      path.style.setProperty('--dur', dur.toFixed(2) + 's');
-      path.style.setProperty('--delay', delay.toFixed(2) + 's');
-      g.appendChild(path);
-    }
-  })();
 </script>
 <script type="application/ld+json">
 {
