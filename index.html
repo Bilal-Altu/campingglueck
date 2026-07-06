@@ -576,21 +576,37 @@
       'varying vec2 v;',
       'uniform sampler2D t;',
       'uniform float u_time,u_gust,u_ca,u_ia;',
+      // smooth value noise
+      'float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}',
+      'float noise(vec2 p){',
+      '  vec2 i=floor(p),f=fract(p);',
+      '  f=f*f*(3.0-2.0*f);',
+      '  return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x),f.y);',
+      '}',
       'void main(){',
       '  vec2 uv=v;',
-      // 1 at the bottom of the hero, fading out toward the horizon
-      '  float m=1.0-smoothstep(0.05,0.62,uv.y);',
-      '  float g=1.0+u_gust;',
-      // travelling waves: different frequencies/speeds moving across the field
-      '  float wx=sin(uv.x*6.3+u_time*1.1+uv.y*2.0)*0.55',
-      '          +sin(uv.x*14.7-u_time*1.9+uv.y*7.0)*0.30',
-      '          +sin(uv.x*27.0+u_time*3.1)*0.15;',
-      '  float wy=sin(uv.x*9.1-u_time*1.4+uv.y*3.5)*0.6',
-      '          +sin(uv.x*19.3+u_time*2.6)*0.4;',
-      '  uv+=vec2(wx,wy*0.35)*0.006*g*m;',
+      '  float horizon=0.62;',
+      '  float m=1.0-smoothstep(0.0,horizon,uv.y);', // 1 bottom -> 0 at horizon
+      '  float md=m*m;',                              // displacement mostly near camera
+      '  float d=clamp(uv.y/horizon,0.0,1.0);',       // 0 near, 1 far
+      '  float g=1.0+u_gust*1.1;',
+      '  float T=u_time*(0.5+u_gust*0.3);',           // wind speeds up during a gust
+      // perspective-aware field coords: distance compresses the pattern
+      '  vec2 fp=vec2(uv.x*(1.0+d*2.2),uv.y*5.0);',
+      // gust patches drifting across the field (large + medium scale)
+      '  float n1=noise(vec2(fp.x*1.6-T*1.5,fp.y*0.8-T*0.45));',
+      '  float n2=noise(vec2(fp.x*4.2-T*2.7,fp.y*2.1-T*0.7));',
+      '  float w=(n1*0.72+n2*0.28)*2.0-1.0;',
+      // stalks lean sideways with the gust, tips dip slightly
+      '  float amp=mix(0.010,0.0018,d)*g*md;',
+      '  uv+=vec2(w,abs(w)*0.3)*amp;',
       // object-fit: cover mapping
       '  vec2 s=(u_ca>u_ia)?vec2(1.0,u_ia/u_ca):vec2(u_ca/u_ia,1.0);',
-      '  gl_FragColor=texture2D(t,(uv-0.5)*s+0.5);',
+      '  vec3 col=texture2D(t,(uv-0.5)*s+0.5).rgb;',
+      // light bands sweeping over the ears as each wave passes
+      '  float sh=noise(vec2(fp.x*1.6-T*1.5+0.4,fp.y*0.8-T*0.45))*2.0-1.0;',
+      '  col*=1.0+sh*0.09*m*g*0.5;',
+      '  gl_FragColor=vec4(col,1.0);',
       '}'
     ].join('\n');
     function sh(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; }
