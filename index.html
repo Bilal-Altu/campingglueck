@@ -285,7 +285,8 @@
     <img src="https://picsum.photos/seed/campingforest/1600/1000" alt="Camping in der Natur" />
     <video autoplay muted loop playsinline preload="auto" aria-hidden="true"
            poster="https://picsum.photos/seed/campingforest/1600/1000"
-           src="https://videos.pexels.com/video-files/11355346/11355346-hd_1920_1080_25fps.mp4"></video>
+           src="https://videos.pexels.com/video-files/37709831/15991113_1920_1080_25fps.mp4"
+           data-src-uhd="https://videos.pexels.com/video-files/37709831/15991116_2560_1440_25fps.mp4"></video>
   </div>
   <div class="hero-inner">
     <h1>Ihr Partner<br />fürs Camping</h1>
@@ -569,6 +570,16 @@
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) { vid.remove(); return; } // poster/img stays
     vid.addEventListener('error', function () { vid.remove(); }); // fall back to still image
 
+    // sharper file for large/high-dpi screens (unless the user opted into data saving)
+    var conn = navigator.connection || {};
+    if (vid.dataset.srcUhd && window.innerWidth * (window.devicePixelRatio || 1) > 2000 && !conn.saveData) {
+      vid.src = vid.dataset.srcUhd;
+    }
+    // calm, slow sway
+    var BASE_RATE = 0.5;
+    vid.defaultPlaybackRate = BASE_RATE;
+    vid.playbackRate = BASE_RATE;
+
     let gust = 0, gustTarget = 0, lastY = window.scrollY, visible = true, prev = performance.now();
     new IntersectionObserver(function (en) {
       visible = en[0].isIntersecting;
@@ -586,7 +597,7 @@
       const dt = Math.min((now - prev) / 1000, 0.1); prev = now;
       gustTarget *= Math.exp(-1.8 * dt);                       // squall dies down
       gust += (gustTarget - gust) * (1 - Math.exp(-5 * dt));   // smooth swell/settle
-      if (vid.parentNode) vid.playbackRate = 1 + gust * 0.7;   // wind picks up
+      if (vid.parentNode) vid.playbackRate = BASE_RATE + gust * 0.35; // wind picks up gently
       if (inner) inner.style.transform = gust > 0.02 ? 'translateY(' + (gust * 22).toFixed(1) + 'px)' : '';
     })(prev);
   })();
