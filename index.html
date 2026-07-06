@@ -126,17 +126,16 @@
   .hero-bg { position: absolute; inset: 0; }
   .hero-bg img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(.55) contrast(1.02) brightness(.72); }
   .hero-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(28,28,23,.35) 0%, rgba(28,28,23,.15) 40%, rgba(28,28,23,.72) 100%); }
-  /* wind: displaced copy of the field, masked to the lower part so the sky stays still */
-  .hero-bg .hero-bg-wind {
-    position: absolute; inset: 0;
-    transform: scale(1.05);
-    filter: grayscale(.55) contrast(1.02) brightness(.72) url(#wind-filter);
-    -webkit-mask-image: linear-gradient(180deg, transparent 30%, #000 55%);
-    mask-image: linear-gradient(180deg, transparent 30%, #000 55%);
-    will-change: filter;
+  /* wind: WebGL-displaced copy of the field, masked to the lower part so the sky stays still */
+  .hero-bg canvas.hero-bg-wind {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    filter: grayscale(.55) contrast(1.02) brightness(.72);
+    -webkit-mask-image: linear-gradient(180deg, transparent 32%, #000 58%);
+    mask-image: linear-gradient(180deg, transparent 32%, #000 58%);
   }
   @media (prefers-reduced-motion: reduce) {
-    .hero-bg .hero-bg-wind { display: none; }
+    .hero-bg canvas.hero-bg-wind { display: none; }
   }
   .hero-inner { position: relative; z-index: 2; width: 100%; display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; padding: var(--pad-x); padding-bottom: clamp(2rem, 4vw, 3.5rem); flex-wrap: wrap; }
   .hero h1 { font-size: var(--hero); line-height: .96; font-weight: 500; letter-spacing: -.02em; margin: 0; max-width: 12ch; }
@@ -286,16 +285,8 @@
 <section class="hero" id="top">
   <div class="hero-bg">
     <img src="https://picsum.photos/seed/campingforest/1600/1000" alt="Camping in der Natur" />
-    <img class="hero-bg-wind" src="https://picsum.photos/seed/campingforest/1600/1000" alt="" aria-hidden="true" />
+    <canvas class="hero-bg-wind" aria-hidden="true"></canvas>
   </div>
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <filter id="wind-filter" x="-20%" y="-20%" width="140%" height="140%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.045" numOctaves="2" seed="7" result="noise">
-        <animate attributeName="baseFrequency" dur="9s" values="0.012 0.045;0.017 0.052;0.012 0.045" repeatCount="indefinite" />
-      </feTurbulence>
-      <feDisplacementMap id="windDisp" in="SourceGraphic" in2="noise" scale="12" xChannelSelector="R" yChannelSelector="G" />
-    </filter>
-  </svg>
   <div class="hero-inner">
     <h1>Ihr Partner<br />fürs Camping</h1>
     <div class="hero-card">
@@ -568,35 +559,112 @@
   t.addEventListener('click', () => l.classList.toggle('open'));
   l.querySelectorAll('a').forEach(a => a.addEventListener('click', () => l.classList.remove('open')));
 
-  // Wind: constant sway via SMIL turbulence; upward scroll triggers a gust
-  // that intensifies the displacement and pushes the hero content down.
+  // Wind: WebGL shader displaces the field with waves travelling across it.
+  // Upward scroll feeds a gust target; the actual gust eases toward it, so
+  // intensity swells and dies down smoothly like a real squall.
   (function wind() {
-    const disp = document.getElementById('windDisp');
-    const inner = document.querySelector('.hero-inner');
+    const canvas = document.querySelector('canvas.hero-bg-wind');
     const hero = document.querySelector('.hero');
-    if (!disp || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const BASE = 12, MAXGUST = 46;
-    let gust = 0, lastY = window.scrollY, raf = null;
+    const inner = document.querySelector('.hero-inner');
+    if (!canvas || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const gl = canvas.getContext('webgl', { antialias: false, alpha: false });
+    if (!gl) { canvas.remove(); return; }
 
-    function tick() {
-      gust *= 0.94; // decay
-      disp.setAttribute('scale', (BASE + gust).toFixed(1));
-      if (inner) inner.style.transform = 'translateY(' + (gust * 0.5).toFixed(1) + 'px)';
-      if (gust > 0.3) { raf = requestAnimationFrame(tick); }
-      else { gust = 0; disp.setAttribute('scale', BASE); if (inner) inner.style.transform = ''; raf = null; }
+    const vsSrc = 'attribute vec2 p;varying vec2 v;void main(){v=p*0.5+0.5;gl_Position=vec4(p,0.,1.);}';
+    const fsSrc = [
+      'precision mediump float;',
+      'varying vec2 v;',
+      'uniform sampler2D t;',
+      'uniform float u_time,u_gust,u_ca,u_ia;',
+      'void main(){',
+      '  vec2 uv=v;',
+      // 1 at the bottom of the hero, fading out toward the horizon
+      '  float m=1.0-smoothstep(0.05,0.62,uv.y);',
+      '  float g=1.0+u_gust;',
+      // travelling waves: different frequencies/speeds moving across the field
+      '  float wx=sin(uv.x*6.3+u_time*1.1+uv.y*2.0)*0.55',
+      '          +sin(uv.x*14.7-u_time*1.9+uv.y*7.0)*0.30',
+      '          +sin(uv.x*27.0+u_time*3.1)*0.15;',
+      '  float wy=sin(uv.x*9.1-u_time*1.4+uv.y*3.5)*0.6',
+      '          +sin(uv.x*19.3+u_time*2.6)*0.4;',
+      '  uv+=vec2(wx,wy*0.35)*0.006*g*m;',
+      // object-fit: cover mapping
+      '  vec2 s=(u_ca>u_ia)?vec2(1.0,u_ia/u_ca):vec2(u_ca/u_ia,1.0);',
+      '  gl_FragColor=texture2D(t,(uv-0.5)*s+0.5);',
+      '}'
+    ].join('\n');
+    function sh(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; }
+    const prog = gl.createProgram();
+    gl.attachShader(prog, sh(gl.VERTEX_SHADER, vsSrc));
+    gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fsSrc));
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { canvas.remove(); return; }
+    gl.useProgram(prog);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(prog, 'p');
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    const uTime = gl.getUniformLocation(prog, 'u_time');
+    const uGust = gl.getUniformLocation(prog, 'u_gust');
+    const uCa = gl.getUniformLocation(prog, 'u_ca');
+    const uIa = gl.getUniformLocation(prog, 'u_ia');
+
+    let ready = false, ia = 1.6;
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function () {
+      try {
+        gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        ia = img.naturalWidth / img.naturalHeight;
+        resize();
+        ready = true;
+        canvas.dataset.ready = '1';
+      } catch (e) { canvas.remove(); }
+    };
+    img.onerror = function () { canvas.remove(); };
+    img.src = document.querySelector('.hero-bg img').src;
+
+    function resize() {
+      const r = hero.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      canvas.width = Math.round(r.width * dpr);
+      canvas.height = Math.round(r.height * dpr);
+      gl.viewport(0, 0, canvas.width, canvas.height);
     }
-    function blow(strength) {
-      if (hero.getBoundingClientRect().bottom < 0) return; // hero off-screen
-      gust = Math.min(gust + strength, MAXGUST);
-      if (!raf) raf = requestAnimationFrame(tick);
-    }
-    window.addEventListener('scroll', () => {
+    window.addEventListener('resize', resize);
+
+    let gust = 0, gustTarget = 0, lastY = window.scrollY, visible = true;
+    new IntersectionObserver(function (en) { visible = en[0].isIntersecting; }).observe(hero);
+    window.addEventListener('scroll', function () {
       const y = window.scrollY, d = y - lastY; lastY = y;
-      if (d < 0) blow(-d * 0.35); // scrolling up
+      if (d < 0) gustTarget = Math.min(gustTarget + (-d) * 0.02, 2.2);
     }, { passive: true });
-    window.addEventListener('wheel', (e) => {
-      if (e.deltaY < 0 && window.scrollY <= 0) blow(-e.deltaY * 0.12); // already at top, still pushing up
+    window.addEventListener('wheel', function (e) {
+      if (e.deltaY < 0 && window.scrollY <= 0) gustTarget = Math.min(gustTarget + (-e.deltaY) * 0.007, 2.2);
     }, { passive: true });
+
+    const t0 = performance.now();
+    let prev = t0;
+    (function frame(now) {
+      requestAnimationFrame(frame);
+      if (!ready || !visible) return; // hidden tabs: browsers throttle rAF natively
+      const dt = Math.min((now - prev) / 1000, 0.1); prev = now;
+      gustTarget *= Math.exp(-2.1 * dt);                  // squall dies down (~0.965/frame at 60fps)
+      gust += (gustTarget - gust) * (1 - Math.exp(-4.3 * dt)); // eased swell/settle, framerate-independent
+      canvas.dataset.gust = gust.toFixed(2);
+      gl.uniform1f(uTime, (now - t0) / 1000);
+      gl.uniform1f(uGust, gust);
+      gl.uniform1f(uCa, canvas.width / canvas.height);
+      gl.uniform1f(uIa, ia);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      if (inner) inner.style.transform = gust > 0.02 ? 'translateY(' + (gust * 14).toFixed(1) + 'px)' : '';
+    })(t0);
   })();
 </script>
 <script type="application/ld+json">
