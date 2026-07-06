@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Campingglück — Ihr Partner für unvergessliche Abenteuer</title>
+<meta name="description" content="Campingglück in Bürstadt — Werkstatt, Ausstattung und Service für Wohnmobile. TÜV, Gasprüfung, Ein- und Zusatzeinbauten." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    /* Palette (from provided tokens) */
+    --sand-surface: #efede7;
+    --sand-text: #1c1c17;
+    --sand-line: #dad6c8;
+    --sand-demoted: #726a4f;
+    --sand-white: #ffffff;
+
+    --green-surface: #2a3220;
+    --green-text: #f3f3f1;
+    --green-line: #3c482e;
+    --green-demoted: #768363;
+
+    --black-surface: #1c1c17;
+    --black-text: #edece9;
+    --black-line: #28271f;
+    --black-demoted: #939393;
+
+    --pop: #f34e30;
+    --white: #ffffff;
+
+    --font-body: "Inter", Arial, sans-serif;
+    --font-head: "Inter", Arial, sans-serif;
+    --font-mono: "Space Mono", ui-monospace, monospace;
+
+    /* Fluid type */
+    --h1: clamp(3rem, 1.6rem + 4.6vw, 5rem);
+    --hero: clamp(3.4rem, 1.2rem + 7vw, 7rem);
+    --h2: clamp(2rem, 1.3rem + 2.2vw, 2.9rem);
+    --big-p: clamp(1.15rem, 1rem + 0.6vw, 1.5rem);
+    --stat: clamp(2.2rem, 1.2rem + 3.4vw, 3.6rem);
+
+    --pad-x: clamp(1.25rem, 0.4rem + 3vw, 3rem);
+    --radius: 0px;
+  }
+
+  * { box-sizing: border-box; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--sand-text);
+    background: var(--sand-surface);
+  }
+  ::selection { color: #fff; background: var(--sand-text); }
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; }
+
+  .wrap { padding-left: var(--pad-x); padding-right: var(--pad-x); }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sand-demoted);
+    margin: 0;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.85rem 1.3rem;
+    border: 1px solid var(--sand-text);
+    border-radius: 100vh;
+    background: transparent;
+    color: var(--sand-text);
+    cursor: pointer;
+    transition: background .25s ease, color .25s ease, border-color .25s ease;
+    white-space: nowrap;
+  }
+  .btn .dot { width: 22px; height: 22px; border-radius: 50%; border: 1px solid currentColor; display: grid; place-items: center; font-size: .8rem; }
+  .btn:hover { background: var(--sand-text); color: var(--sand-surface); }
+  .btn--pop { background: var(--pop); border-color: var(--pop); color: #fff; }
+  .btn--pop:hover { background: #d63c21; border-color: #d63c21; color: #fff; }
+  .btn--light { border-color: rgba(255,255,255,.45); color: #fff; }
+  .btn--light:hover { background: #fff; color: var(--black-surface); }
+
+  /* ---------- NAV ---------- */
+  header.nav {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem var(--pad-x);
+    background: rgba(28,28,23,.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--black-line);
+    color: var(--black-text);
+  }
+  .brand { display: flex; align-items: center; gap: .6rem; font-weight: 600; letter-spacing: .01em; }
+  .brand .mark { color: var(--pop); font-size: 1.1rem; }
+  .nav-links { display: flex; gap: clamp(1rem, 2.4vw, 2.2rem); align-items: center; }
+  .nav-links a {
+    font-family: var(--font-mono);
+    font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--black-demoted); transition: color .2s ease;
+  }
+  .nav-links a:hover { color: var(--black-text); }
+  .nav-links a.cta { color: var(--pop); }
+  .nav-toggle { display: none; background: none; border: 0; color: inherit; cursor: pointer; }
+
+  /* ---------- HERO ---------- */
+  .hero { position: relative; min-height: min(88vh, 760px); display: flex; align-items: flex-end; color: #fff; overflow: hidden; }
+  .hero-bg { position: absolute; inset: 0; }
+  .hero-bg img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(.55) contrast(1.02) brightness(.72); }
+  .hero-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(28,28,23,.35) 0%, rgba(28,28,23,.15) 40%, rgba(28,28,23,.72) 100%); }
+  .hero-inner { position: relative; z-index: 2; width: 100%; display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; padding: var(--pad-x); padding-bottom: clamp(2rem, 4vw, 3.5rem); flex-wrap: wrap; }
+  .hero h1 { font-size: var(--hero); line-height: .96; font-weight: 500; letter-spacing: -.02em; margin: 0; max-width: 12ch; }
+  .hero-card { background: var(--sand-surface); color: var(--sand-text); padding: 1.4rem; width: min(340px, 100%); }
+  .hero-card p { margin: 0 0 1.1rem; font-size: 1.05rem; line-height: 1.35; }
+  .hero-card .card-actions { display: flex; gap: .6rem; flex-wrap: wrap; }
+
+  /* ---------- SECTION HEADERS ---------- */
+  section { position: relative; }
+  .sec-pad { padding-top: clamp(3.5rem, 6vw, 6rem); padding-bottom: clamp(3.5rem, 6vw, 6rem); }
+  .sec-label { display: flex; align-items: center; gap: .8rem; padding-bottom: 2.2rem; border-bottom: 1px solid var(--sand-line); margin-bottom: 2.4rem; }
+  .sec-label .num { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .12em; color: var(--pop); }
+  .sec-label h2 { font-size: .82rem; text-transform: uppercase; letter-spacing: .1em; font-weight: 500; color: var(--sand-demoted); margin: 0; font-family: var(--font-mono); }
+
+  /* ---------- OPPORTUNITY / INTRO + STATS ---------- */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 5rem); }
+  .intro-copy { align-self: end; }
+  .intro-copy p { font-size: var(--big-p); line-height: 1.45; max-width: 42ch; margin: 0 0 1.3rem; }
+  .intro-copy .lead { color: var(--sand-text); }
+  .intro-copy .muted { color: var(--sand-demoted); font-size: 1rem; }
+
+  .stats { display: flex; flex-direction: column; }
+  .stat { padding: 1.6rem 0; border-top: 1px solid var(--sand-line); }
+  .stat:last-child { border-bottom: 1px solid var(--sand-line); }
+  .stat h3 { font-size: var(--stat); line-height: 1; font-weight: 500; letter-spacing: -.02em; margin: 0 0 .5rem; }
+  .stat h3 .pop { color: var(--pop); }
+  .stat p { margin: 0; color: var(--sand-demoted); font-size: .98rem; max-width: 46ch; }
+
+  /* ---------- GREEN: LEISTUNGEN ---------- */
+  .green { background: var(--green-surface); color: var(--green-text); }
+  .green .sec-label { border-color: var(--green-line); }
+  .green .sec-label h2 { color: var(--green-demoted); }
+  .leist-head { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem,5vw,5rem); align-items: start; margin-bottom: 3rem; }
+  .leist-head h2.big { font-size: var(--h2); font-weight: 500; letter-spacing: -.015em; line-height: 1.05; margin: 0; max-width: 16ch; }
+  .leist-head p { color: var(--green-demoted); font-size: 1.05rem; margin: 0; max-width: 44ch; }
+  .leist-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--green-line); border: 1px solid var(--green-line); }
+  .leist-item { background: var(--green-surface); padding: 1.6rem; display: flex; gap: 1rem; }
+  .leist-item .idx { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .1em; color: var(--pop); padding-top: .25rem; min-width: 2.2rem; }
+  .leist-item h4 { margin: 0 0 .5rem; font-size: 1.15rem; font-weight: 600; }
+  .leist-item p { margin: 0; color: var(--green-demoted); font-size: .95rem; }
+
+  /* ---------- PORTFOLIO / GALLERY ---------- */
+  .black { background: var(--black-surface); color: var(--black-text); }
+  .black .sec-label { border-color: var(--black-line); }
+  .black .sec-label h2 { color: var(--black-demoted); }
+  .gal-head { display: flex; justify-content: space-between; gap: 2rem; flex-wrap: wrap; margin-bottom: 2.4rem; }
+  .gal-head h2 { font-size: var(--h2); font-weight: 500; margin: 0; letter-spacing: -.015em; max-width: 14ch; }
+  .gal-head p { color: var(--black-demoted); max-width: 40ch; margin: 0; align-self: end; }
+  .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; }
+  .card {
+    background: var(--black-line); overflow: hidden; border: 1px solid var(--black-line);
+  }
+  .card .cap { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.1rem; }
+  .card .cap span { font-weight: 600; }
+  .card .cap small { display: block; color: var(--black-demoted); font-size: .85rem; font-weight: 400; margin-top: .15rem; }
+  .card .cap .arrow { color: var(--pop); font-family: var(--font-mono); }
+  .card .thumb { aspect-ratio: 4/5; overflow: hidden; }
+  .card .thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
+  .card:hover .thumb img { transform: scale(1.05); }
+
+  /* ---------- STATEMENT / ABOUT ---------- */
+  .statement { text-align: center; }
+  .statement .eyebrow { text-align: center; margin-bottom: 1.4rem; }
+  .statement h2 { font-size: clamp(1.7rem, 1rem + 2.6vw, 3rem); font-weight: 500; letter-spacing: -.02em; line-height: 1.12; margin: 0 auto 1.4rem; max-width: 20ch; }
+  .statement h2 .pop { color: var(--pop); }
+  .statement .sub { font-size: var(--big-p); margin: 0 auto 2rem; max-width: 40ch; color: var(--sand-text); }
+  .statement .body { color: var(--sand-demoted); max-width: 54ch; margin: 0 auto 1rem; }
+  .statement .actions { display: flex; gap: .8rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem; }
+
+  /* ---------- ABOUT / ÜBER UNS ---------- */
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem,5vw,5rem); align-items: center; }
+  .about-grid .media { aspect-ratio: 5/6; overflow: hidden; }
+  .about-grid .media img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(.35); }
+  .about-copy h2 { font-size: var(--h2); font-weight: 500; letter-spacing: -.015em; line-height: 1.06; margin: .4rem 0 1rem; }
+  .about-copy .sub { font-size: var(--big-p); color: var(--sand-text); margin: 0 0 1.4rem; }
+  .about-copy p { color: var(--sand-demoted); margin: 0 0 1rem; max-width: 46ch; }
+
+  /* ---------- CONTACT ---------- */
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem,5vw,4.5rem); }
+  .contact-grid h2 { font-size: var(--h2); font-weight: 500; margin: .4rem 0 1.2rem; letter-spacing: -.015em; }
+  .contact-info { display: flex; flex-direction: column; gap: 1.4rem; }
+  .info-row { border-top: 1px solid var(--black-line); padding-top: 1rem; }
+  .info-row .lbl { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--black-demoted); display: block; margin-bottom: .35rem; }
+  .info-row a, .info-row span { font-size: 1.1rem; color: var(--black-text); }
+  .info-row a:hover { color: var(--pop); }
+
+  form { display: flex; flex-direction: column; gap: 1.1rem; }
+  label { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--black-demoted); }
+  input[type="text"], input[type="email"], input[type="tel"], textarea {
+    width: 100%; background: transparent; border: 1px solid var(--black-line); color: var(--black-text);
+    padding: .85rem 1rem; font-family: var(--font-body); font-size: 1rem; border-radius: var(--radius);
+  }
+  input:focus, textarea:focus { outline: none; border-color: var(--pop); }
+  textarea { resize: vertical; min-height: 140px; }
+  .checkbox { display: flex; gap: .7rem; align-items: flex-start; color: var(--black-demoted); font-size: .85rem; line-height: 1.4; }
+  .checkbox input { margin-top: .2rem; accent-color: var(--pop); }
+  .form-note { color: var(--black-demoted); font-size: .8rem; }
+
+  /* ---------- IMPRESSUM ---------- */
+  .impressum-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--sand-line); border: 1px solid var(--sand-line); }
+  .imp-item { background: var(--sand-surface); padding: 1.4rem 1.5rem; }
+  .imp-item .lbl { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--sand-demoted); margin: 0 0 .5rem; }
+  .imp-item p { margin: 0; font-size: 1.05rem; line-height: 1.4; }
+
+  /* ---------- FOOTER ---------- */
+  footer.foot { background: var(--black-surface); color: var(--black-text); padding: clamp(3rem,5vw,4.5rem) var(--pad-x) 2rem; }
+  .foot-top { display: flex; justify-content: space-between; gap: 2rem; flex-wrap: wrap; align-items: flex-start; padding-bottom: 3rem; border-bottom: 1px solid var(--black-line); }
+  .foot-brand { font-size: clamp(2rem, 1rem + 4vw, 3.5rem); font-weight: 500; letter-spacing: -.02em; }
+  .foot-links { display: flex; gap: .6rem; flex-wrap: wrap; max-width: 420px; }
+  .foot-links a { font-family: var(--font-mono); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; border: 1px solid var(--black-line); padding: .5rem .9rem; border-radius: 100vh; color: var(--black-demoted); transition: all .2s ease; }
+  .foot-links a:hover { color: var(--black-text); border-color: var(--black-demoted); }
+  .foot-bottom { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding-top: 1.6rem; color: var(--black-demoted); font-size: .8rem; font-family: var(--font-mono); letter-spacing: .06em; }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 860px) {
+    .split, .leist-head, .about-grid, .contact-grid { grid-template-columns: 1fr; }
+    .leist-grid { grid-template-columns: 1fr; }
+    .gallery { grid-template-columns: 1fr; }
+    .impressum-grid { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+    .nav-links.open { display: flex; position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; gap: 1.2rem; background: var(--black-surface); padding: 1.5rem var(--pad-x); border-bottom: 1px solid var(--black-line); }
+    .nav-toggle { display: block; }
+    .hero-inner { align-items: flex-start; flex-direction: column; }
+  }
+  @media (max-width: 560px) {
+    .gallery { grid-template-columns: 1fr; }
+    .hero-card { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<header class="nav">
+  <a class="brand" href="#top"><span class="mark">✳</span> Campingglück</a>
+  <nav class="nav-links" id="navLinks">
+    <a href="#top">Startseite</a>
+    <a href="#leistungen">Leistungen</a>
+    <a href="#ueber-uns">Über uns</a>
+    <a href="#impressum">Impressum</a>
+    <a href="#kontakt" class="cta">Kontakt</a>
+  </nav>
+  <button class="nav-toggle" id="navToggle" aria-label="Menü">☰</button>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-bg">
+    <img src="https://picsum.photos/seed/campingforest/1600/1000" alt="Camping in der Natur" />
+  </div>
+  <div class="hero-inner">
+    <h1>Ihr Partner<br />fürs Camping</h1>
+    <div class="hero-card">
+      <p>Werkstatt, Ausstattung &amp; Service für Ihr Wohnmobil — alles aus einer Hand.</p>
+      <div class="card-actions">
+        <a href="#leistungen" class="btn"><span class="dot">↓</span> Leistungen</a>
+        <a href="#kontakt" class="btn btn--pop">Termin anfragen</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTRO + STATS -->
+<section class="sec-pad wrap">
+  <div class="sec-label">
+    <span class="num">01</span>
+    <h2>Wofür Campingglück steht</h2>
+  </div>
+  <div class="split">
+    <div class="intro-copy">
+      <p class="lead">Entdecken Sie die besten Produkte und Dienstleistungen für Ihr Campingerlebnis. Ob Reparatur oder neue Ausstattung — wir haben alles, was das Camperherz begehrt.</p>
+      <p class="muted">Ein Fachbetrieb in Bürstadt, der auf Qualität setzt. Wir verbauen bewährte Originalteile, arbeiten sauber von Hand und passen Ihr Fahrzeug genau an Ihre Wünsche an.</p>
+      <p><a href="#leistungen" class="btn">Was wir bieten</a></p>
+    </div>
+    <div class="stats">
+      <div class="stat">
+        <h3>Erstklassige <span class="pop">Produkte</span></h3>
+        <p>Wir bieten nur die besten Materialien für Ihre Ausrüstung. Qualität ist unser Motto.</p>
+      </div>
+      <div class="stat">
+        <h3>Fachkundige <span class="pop">Reparatur</span></h3>
+        <p>Unsere Reparaturwerkstatt sorgt dafür, dass Ihr Campingmobil immer in Topform bleibt.</p>
+      </div>
+      <div class="stat">
+        <h3>Einzigartige <span class="pop">Lösungen</span></h3>
+        <p>Wir helfen Ihnen, Ihr Fahrzeug nach Ihren individuellen Wünschen anzupassen.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LEISTUNGEN (GREEN) -->
+<section class="green sec-pad" id="leistungen">
+  <div class="wrap">
+    <div class="sec-label">
+      <span class="num">02</span>
+      <h2>Leistungen</h2>
+    </div>
+    <div class="leist-head">
+      <h2 class="big">Was bieten wir Ihnen an?</h2>
+      <p>Von der gesetzlichen Prüfung bis zum individuellen Ausbau — ein zusammenhängendes Leistungsangebot rund um Ihr Wohnmobil.</p>
+    </div>
+    <div class="leist-grid">
+      <div class="leist-item">
+        <span class="idx">01</span>
+        <div>
+          <h4>Hauptuntersuchung &amp; Gasprüfung</h4>
+          <p>Hauptuntersuchung (TÜV) und Gasprüfung nach G607 — zuverlässig und pünktlich.</p>
+        </div>
+      </div>
+      <div class="leist-item">
+        <span class="idx">02</span>
+        <div>
+          <h4>Fahrzeugwäsche</h4>
+          <p>Fahrzeugwäschen außen und innen — sorgfältige Handwäsche.</p>
+        </div>
+      </div>
+      <div class="leist-item">
+        <span class="idx">03</span>
+        <div>
+          <h4>Schreinerarbeiten</h4>
+          <p>Maßgefertigte Schreinerarbeiten für den Innenausbau Ihres Campers.</p>
+        </div>
+      </div>
+      <div class="leist-item">
+        <span class="idx">04</span>
+        <div>
+          <h4>Originalteile &amp; Zubehör</h4>
+          <p>Einbau von Originalteilen und passendem Zubehör.</p>
+        </div>
+      </div>
+      <div class="leist-item">
+        <span class="idx">05</span>
+        <div>
+          <h4>Zusatzeinbauten</h4>
+          <p>SAT-Anlagen, Solaranlagen, Wechselrichter, Navigationssysteme, Anhängerkupplung, Auflastungen, Rückfahrkamerasysteme, Klimaanlagen, Heizsysteme, Batterietausch, Alarmanlagen u. v. m.</p>
+        </div>
+      </div>
+      <div class="leist-item">
+        <span class="idx">06</span>
+        <div>
+          <h4>Individuelle Beratung</h4>
+          <p>Terminanfragen ohne Wartezeit — melden Sie sich telefonisch an, wir planen gemeinsam.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY (BLACK) -->
+<section class="black sec-pad" id="galerie">
+  <div class="wrap">
+    <div class="sec-label">
+      <span class="num">03</span>
+      <h2>Einblicke</h2>
+    </div>
+    <div class="gal-head">
+      <h2>Handwerk &amp; Ausstattung</h2>
+      <p>Ein Blick auf unsere Werkstatt, unsere Arbeit und die Fahrzeuge, die wir startklar machen.</p>
+    </div>
+    <div class="gallery">
+      <div class="card">
+        <div class="thumb"><img src="https://picsum.photos/seed/camperworkshop/800/1000" alt="Werkstatt" /></div>
+        <div class="cap"><span>Werkstatt<small>Reparatur &amp; Service</small></span><span class="arrow">→</span></div>
+      </div>
+      <div class="card">
+        <div class="thumb"><img src="https://picsum.photos/seed/motorhomeroad/800/1000" alt="Wohnmobil unterwegs" /></div>
+        <div class="cap"><span>Ausbau<small>Zusatzeinbauten</small></span><span class="arrow">→</span></div>
+      </div>
+      <div class="card">
+        <div class="thumb"><img src="https://picsum.photos/seed/campnature/800/1000" alt="Camping in der Natur" /></div>
+        <div class="cap"><span>Abenteuer<small>Startklar für die Reise</small></span><span class="arrow">→</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATEMENT -->
+<section class="sec-pad wrap statement">
+  <p class="eyebrow">Campingglück</p>
+  <h2>Ihr Partner für <span class="pop">unvergessliche</span> Abenteuer.</h2>
+  <p class="sub">Wir bringen Ihre Reise zum Blühen.</p>
+  <p class="body">Ein Unternehmen, das einen hohen Maß an Qualität als Standard setzt — sei es bei den verbauten Produkten oder der geleisteten Arbeit.</p>
+  <p class="body">Wir sind passionierte Camper und wissen, was Sie für Ihren nächsten Trip benötigen. Lassen Sie uns zusammen Ihre Campingträume verwirklichen.</p>
+  <div class="actions">
+    <a href="#leistungen" class="btn">Leistungen ansehen</a>
+    <a href="#kontakt" class="btn btn--pop">Jetzt anfragen</a>
+  </div>
+</section>
+
+<!-- ÜBER UNS -->
+<section class="green sec-pad" id="ueber-uns">
+  <div class="wrap">
+    <div class="sec-label">
+      <span class="num">04</span>
+      <h2>Über uns</h2>
+    </div>
+    <div class="about-grid">
+      <div class="media"><img src="https://picsum.photos/seed/campingglueckteam/900/1080" alt="Wir bei Campingglück" /></div>
+      <div class="about-copy">
+        <p class="eyebrow" style="color:var(--green-demoted)">Wir bei Campingglück</p>
+        <h2>Ihr zuverlässiger Begleiter im Campingabenteuer</h2>
+        <p class="sub" style="color:var(--green-text)">Campingglück ist mehr als nur ein Geschäft — es ist eine Leidenschaft.</p>
+        <p style="color:var(--green-demoted)">Unser Team hat sich der Aufgabe verschrieben, Ihnen den besten Service und die besten Produkte im Bereich Camping und Wohnmobile zu bieten. Wir streben nach höchsten Standards und liefern Qualität.</p>
+        <p style="color:var(--green-demoted)">Bereit für Ihr nächstes Abenteuer? Lassen Sie uns zusammen planen. Kontaktieren Sie uns heute und lassen Sie uns herausfinden, wie wir Ihre Campingträume zum Leben erwecken können. Wir freuen uns auf Sie!</p>
+        <p style="margin-top:1.6rem"><a href="#kontakt" class="btn btn--light">Jetzt anfragen</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KONTAKT -->
+<section class="black sec-pad" id="kontakt">
+  <div class="wrap">
+    <div class="sec-label">
+      <span class="num">05</span>
+      <h2>Kontakt aufnehmen</h2>
+    </div>
+    <div class="contact-grid">
+      <div>
+        <h2>Lassen Sie uns zusammen planen.</h2>
+        <div class="contact-info">
+          <div class="info-row">
+            <span class="lbl">Telefon</span>
+            <a href="tel:017662436591">0176 62436591</a>
+          </div>
+          <div class="info-row">
+            <span class="lbl">E-Mail</span>
+            <a href="mailto:info@camping-glück.com">info@camping-glück.com</a>
+          </div>
+          <div class="info-row">
+            <span class="lbl">Adresse</span>
+            <span>Lorscher Straße 21, 68642 Bürstadt<br />Hessen, Deutschland</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <form onsubmit="event.preventDefault(); this.reset(); document.getElementById('formMsg').textContent='Vielen Dank! Wir melden uns bei Ihnen.';">
+          <div>
+            <label for="name">Name *</label>
+            <input type="text" id="name" name="name" required />
+          </div>
+          <div>
+            <label for="msg">Anfrage — bitte mit Kontaktdaten / E-Mail / Telefonnr.</label>
+            <textarea id="msg" name="msg" required></textarea>
+          </div>
+          <label class="checkbox">
+            <input type="checkbox" required />
+            <span>Ich bin damit einverstanden, dass diese Daten zum Zwecke der Kontaktaufnahme gespeichert und verarbeitet werden. Mir ist bekannt, dass ich meine Einwilligung jederzeit widerrufen kann. *</span>
+          </label>
+          <p class="form-note">Bitte füllen Sie alle erforderlichen Felder aus.</p>
+          <button type="submit" class="btn btn--pop" style="justify-content:center">Senden</button>
+          <p class="form-note" id="formMsg" style="color:var(--pop)"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPRESSUM -->
+<section class="sec-pad wrap" id="impressum">
+  <div class="sec-label">
+    <span class="num">06</span>
+    <h2>Impressum</h2>
+  </div>
+  <div class="impressum-grid">
+    <div class="imp-item">
+      <p class="lbl">Name des Unternehmens</p>
+      <p>Camping Glück</p>
+    </div>
+    <div class="imp-item">
+      <p class="lbl">Eingetragener Firmensitz</p>
+      <p>Lorscher Straße 21<br />68642 Bürstadt</p>
+    </div>
+    <div class="imp-item">
+      <p class="lbl">Kontaktinformationen</p>
+      <p>Inh. Rakow Alexander</p>
+    </div>
+    <div class="imp-item">
+      <p class="lbl">Umsatzsteuer-Nr.</p>
+      <p>005 859 01396</p>
+    </div>
+    <div class="imp-item">
+      <p class="lbl">Unternehmensnummer</p>
+      <p>5351 8491 7154 001</p>
+    </div>
+    <div class="imp-item">
+      <p class="lbl">Aufsichtsbehörde</p>
+      <p>Finanzamt Bensheim</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="foot">
+  <div class="foot-top">
+    <div class="foot-brand">Campingglück</div>
+    <div class="foot-links">
+      <a href="#top">Startseite</a>
+      <a href="#leistungen">Leistungen</a>
+      <a href="#ueber-uns">Über uns</a>
+      <a href="#kontakt">Kontakt</a>
+      <a href="#impressum">Impressum</a>
+      <a href="#kontakt">Datenschutz</a>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span>© 2026 Camping Glück — Alle Rechte vorbehalten.</span>
+    <span>Bürstadt · Hessen · Deutschland</span>
+  </div>
+</footer>
+
+<script>
+  const t = document.getElementById('navToggle');
+  const l = document.getElementById('navLinks');
+  t.addEventListener('click', () => l.classList.toggle('open'));
+  l.querySelectorAll('a').forEach(a => a.addEventListener('click', () => l.classList.remove('open')));
+</script>
+</body>
+</html>
